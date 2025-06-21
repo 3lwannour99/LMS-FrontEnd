@@ -1,16 +1,32 @@
 import apiClient from './apiClient.js';
 
 // Create lesson (Instructor/Admin only)
-export const createLesson = async (courseId, moduleId, lessonData) => {
+export const createLesson = async (courseId, moduleId, lessonData, isFormData = false) => {
   try {
+    const config = isFormData ? {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      timeout: 60000, // 60 seconds for file uploads
+    } : {};
 
-    const response = await apiClient.post(`/lessons/courses/${courseId}/modules/${moduleId}/lessons`, lessonData);
+    const response = await apiClient.post(`/lessons/courses/${courseId}/modules/${moduleId}/lessons`, lessonData, config);
 
     return response.data?.data || response.data;
   } catch (error) {
     console.error('Error creating lesson:', error);
     console.error('Error response:', error.response?.data);
     console.error('Error status:', error.response?.status);
+    
+    // Enhance error with more specific information
+    if (error.response?.data) {
+      const enhancedError = new Error(error.response.data.message || 'Failed to create lesson');
+      enhancedError.response = error.response;
+      enhancedError.status = error.response.status;
+      enhancedError.data = error.response.data;
+      throw enhancedError;
+    }
+    
     throw error;
   }
 };
