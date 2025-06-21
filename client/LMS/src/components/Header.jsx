@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   AppBar,
   Toolbar,
@@ -19,12 +19,14 @@ import {
   Settings as SettingsIcon,
   MenuBook as MenuBookIcon,
   Dashboard as DashboardIcon,
-  Brightness4 as DarkModeIcon,
-  Brightness7 as LightModeIcon
+  Brightness4,
+  Brightness7
 } from '@mui/icons-material';
 import { styled, alpha } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import ThemeToggleButton from './ThemeToggleButton';
+import { useThemeContext } from '../contexts/ThemeContext.jsx';
 
 // Styled components
 const Search = styled('div')(({ theme }) => ({
@@ -109,11 +111,12 @@ const HeaderIconButton = styled(IconButton)(({ theme }) => ({
   },
 }));
 
-const Header = ({ mode, toggleDarkMode }) => {
+const Header = () => {
   const navigate = useNavigate();
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
   const { user, logout } = useAuth();
+  const { mode, toggleMode } = useThemeContext();
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
 
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
@@ -199,9 +202,9 @@ const Header = ({ mode, toggleDarkMode }) => {
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
     >
-      <MenuItem onClick={toggleDarkMode}>
+      <MenuItem onClick={toggleMode}>
         <IconButton size="large" color="inherit">
-          {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
+          {mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
         </IconButton>
         <p>{mode === 'light' ? 'Dark' : 'Light'} Mode</p>
       </MenuItem>
@@ -225,11 +228,29 @@ const Header = ({ mode, toggleDarkMode }) => {
       )}
 
       {user && (
+        <MenuItem onClick={handleProfileClick}>
+          <IconButton size="large" color="inherit">
+            <AccountCircleIcon />
+          </IconButton>
+          <p>Profile</p>
+        </MenuItem>
+      )}
+
+      {user && (
         <MenuItem onClick={handleSettingsClick}>
           <IconButton size="large" color="inherit">
             <SettingsIcon />
           </IconButton>
           <p>Settings</p>
+        </MenuItem>
+      )}
+
+      {user && (
+        <MenuItem onClick={handleLogout}>
+          <IconButton size="large" color="inherit">
+            <AccountCircleIcon />
+          </IconButton>
+          <p>Logout</p>
         </MenuItem>
       )}
 
@@ -277,13 +298,13 @@ const Header = ({ mode, toggleDarkMode }) => {
             {/* Logo */}
             <Box
               sx={{
-                display: 'flex',
+                display: { xs: 'none', md: 'flex' },
                 alignItems: 'center',
                 mr: 2,
                 cursor: 'pointer',
                 '&:hover': { opacity: 0.8 }
               }}
-              onClick={() => navigate('/')}
+              onClick={() => user ? handleDashboardClick() : navigate('/')}
             >
               <SchoolIcon sx={{ mr: 1, fontSize: 28 }} />
               <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 'bold' }}>
@@ -305,7 +326,11 @@ const Header = ({ mode, toggleDarkMode }) => {
             </HeaderIconButton>
 
             {/* Search Bar */}
-            <Search>
+            <Search
+              sx={{
+                flexGrow: { xs: 1, sm: 0 },
+              }}
+            >
               <SearchIconWrapper>
                 <SearchIcon />
               </SearchIconWrapper>
@@ -319,16 +344,7 @@ const Header = ({ mode, toggleDarkMode }) => {
 
             {/* Desktop Icons */}
             <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center' }}>
-              <Tooltip title={`Switch to ${mode === 'light' ? 'dark' : 'light'} mode`}>
-                <HeaderIconButton
-                  size="large"
-                  color="inherit"
-                  onClick={toggleDarkMode}
-                  disableRipple
-                >
-                  {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
-                </HeaderIconButton>
-              </Tooltip>
+              <ThemeToggleButton size="large" />
 
               {user && (
                 <Tooltip title="Dashboard">
