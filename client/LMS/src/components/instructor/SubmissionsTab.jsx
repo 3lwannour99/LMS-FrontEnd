@@ -307,10 +307,10 @@ const SubmissionsTab = () => {
                     <TableRow key={submission.id}>
                       <TableCell>
                         <Typography variant="body2" fontWeight="medium">
-                          {submission.student_name || 'Unknown Student'}
+                          {submission.user_name || 'Unknown Student'}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                          {submission.student_email}
+                          {submission.user_email}
                         </Typography>
                       </TableCell>
                       <TableCell>{formatDate(submission.submitted_at)}</TableCell>
@@ -396,7 +396,7 @@ const SubmissionsTab = () => {
         <DialogContent>
           <Box mt={2}>
             <Typography variant="subtitle2" gutterBottom>
-              Student: {selectedSubmission?.student_name}
+              Student: {selectedSubmission?.user_name}
             </Typography>
             <Typography variant="body2" color="text.secondary" mb={3}>
               Assignment: {selectedAssignment?.title}
